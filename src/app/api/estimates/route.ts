@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { estimateInputSchema } from '@/lib/validations';
 import type { BrandEstimate, BrandCode, EstimateResponse } from '@/types';
 
-// Mock brand data for MVP (no DB yet)
 function calculateEstimates(input: {
   windowType: string | null;
   dimensions: { width: number; height: number } | null;
@@ -78,7 +77,6 @@ function calculateEstimates(input: {
     const unitMax = Math.round(brand.baseMax * baseMultiplier);
     const totalMin = unitMin * qty;
     const totalMax = unitMax * qty;
-    // 평당 비용 (assuming ~3.3m² per pyeong, standard window ~1.5m²)
     const pyeongMin = Math.round(unitMin * 0.45);
     const pyeongMax = Math.round(unitMax * 0.45);
 
@@ -115,7 +113,30 @@ export async function POST(request: Request) {
       quantity: result.data.quantity,
     });
 
-    const estimateId = `est_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // DB 저장 시도 (DB 미연결 시 fallback)
+    let estimateId: string;
+    try {
+      const { getPrisma } = await import('@/lib/prisma');
+      const saved = await getPrisma().estimate.create({
+        data: {
+          name: result.data.name,
+          phone: result.data.phone,
+          zonecode: result.data.address.zonecode,
+          address: result.data.address.address,
+          addressDetail: result.data.address.addressDetail,
+          floor: result.data.address.floor,
+          windowType: result.data.windowType,
+          width: result.data.dimensions?.width,
+          height: result.data.dimensions?.height,
+          quantity: result.data.quantity,
+          results: JSON.parse(JSON.stringify(estimates)),
+        },
+      });
+      estimateId = saved.id;
+    } catch {
+      // DB 미연결 시 임시 ID
+      estimateId = `est_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     const response: EstimateResponse = {
       estimateId,

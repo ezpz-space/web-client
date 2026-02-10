@@ -14,8 +14,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // MVP: Generate consultation ID without DB
-    const consultationId = `con_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // DB 저장 시도 (DB 미연결 시 fallback)
+    let consultationId: string;
+    try {
+      const { getPrisma } = await import('@/lib/prisma');
+      const saved = await getPrisma().consultation.create({
+        data: {
+          estimateId: result.data.estimateId,
+          name: result.data.name,
+          phone: result.data.phone,
+          address: result.data.address,
+          availableDays: result.data.availableDays,
+          timeSlot: result.data.timeSlot,
+          consultationType: result.data.consultationType,
+        },
+      });
+      consultationId = saved.id;
+    } catch {
+      consultationId = `con_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     const response: ConsultationResponse = {
       consultationId,

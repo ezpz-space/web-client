@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Estimate {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Step 1
+  name  String
+  phone String
+
+  // Step 2
+  zonecode      String
+  address       String
+  addressDetail String?
+  floor         Int?
+
+  // Step 3
+  windowType String? // 'expanded' | 'non-expanded'
+
+  // Step 4
+  width  Int?
+  height Int?
+
+  // Step 5
+  quantity Int?
+
+  // Result (JSON)
+  results Json?
+
+  consultations Consultation[]
+
+  @@index([phone])
+  @@index([createdAt])
+}
+
+model Consultation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  estimateId       String
+  estimate         Estimate @relation(fields: [estimateId], references: [id])
+
+  name             String
+  phone            String
+  address          String
+
+  availableDays    String[] // ['MON', 'TUE', ...]
+  timeSlot         String
+  consultationType String   // 'PHONE' | 'VISIT'
+
+  status           String   @default("PENDING") // PENDING | CONTACTED | COMPLETED
+
+  @@index([estimateId])
+  @@index([status])
+  @@index([createdAt])
+}

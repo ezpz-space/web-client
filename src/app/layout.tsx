@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Header } from '@/components/layout';
 import { ToastProvider } from '@/components/ui';
@@ -24,6 +25,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <Script
+          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          strategy="lazyOnload"
+        />
+      </head>
       <body className="antialiased">
         <ToastProvider>
           <div className="flex min-h-screen flex-col">

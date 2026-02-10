@@ -74,11 +74,13 @@ export default function Step3Page() {
           </span>
         </p>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3" role="radiogroup" aria-label="창 유형 선택">
           {WINDOW_OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
+              role="radio"
+              aria-checked={windowType === option.value}
               onClick={() => setWindowType(option.value)}
               className={cn(
                 'flex flex-col items-start gap-1 rounded-xl border-2 px-5 py-4 text-left transition-all cursor-pointer',

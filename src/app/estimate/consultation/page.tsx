@@ -119,11 +119,12 @@ export default function ConsultationPage() {
         {/* Day selector */}
         <section>
           <h2 className="text-sm font-semibold text-gray-700 mb-3">상담 가능 요일 (복수 선택)</h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2" role="group" aria-label="상담 가능 요일">
             {DAYS.map((day) => (
               <button
                 key={day.value}
                 type="button"
+                aria-pressed={availableDays.includes(day.value)}
                 onClick={() => toggleDay(day.value)}
                 className={cn(
                   'flex-1 rounded-lg py-3 text-sm font-medium transition-colors cursor-pointer',
@@ -141,11 +142,13 @@ export default function ConsultationPage() {
         {/* Time grid */}
         <section>
           <h2 className="text-sm font-semibold text-gray-700 mb-3">상담 가능 시간</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="상담 가능 시간">
             {TIME_SLOTS.map((slot) => (
               <button
                 key={slot.value}
                 type="button"
+                role="radio"
+                aria-checked={timeSlot === slot.value}
                 onClick={() => setTimeSlot(slot.value)}
                 className={cn(
                   'rounded-lg py-3 text-sm font-medium transition-colors cursor-pointer',
@@ -163,11 +166,13 @@ export default function ConsultationPage() {
         {/* Consultation type */}
         <section>
           <h2 className="text-sm font-semibold text-gray-700 mb-3">상담 방식</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="상담 방식">
             {CONSULTATION_TYPES.map((type) => (
               <button
                 key={type.value}
                 type="button"
+                role="radio"
+                aria-checked={consultationType === type.value}
                 onClick={() => setConsultationType(type.value)}
                 className={cn(
                   'flex flex-col items-center gap-1 rounded-xl border-2 px-4 py-4 transition-all cursor-pointer',
