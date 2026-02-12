@@ -24,11 +24,8 @@
 ## 시작하기
 
 ```bash
-# 의존성 설치
+# 의존성 설치 (Prisma 클라이언트 자동 생성)
 npm install
-
-# Prisma 클라이언트 생성
-npx prisma generate
 
 # 개발 서버
 npm run dev
@@ -62,7 +59,7 @@ src/
 │   ├── ui/                 # 공통 UI (Button, Input, Modal, BottomSheet 등)
 │   ├── layout/             # Header, Drawer, Footer
 │   ├── estimate/           # StepLayout, WindowStepLayout, ProgressIndicator
-│   └── landing/            # EstimateChart, FaqSection, StatsSection
+│   └── landing/            # EstimateChart, FaqSection, StatsSection, ComingSoonCTA
 ├── hooks/                  # useEstimateStore (Zustand)
 ├── lib/                    # utils, validations, storage, prisma
 └── types/                  # 공유 타입 정의
