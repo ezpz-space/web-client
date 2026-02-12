@@ -21,36 +21,17 @@ export function Drawer({ open, onClose }: DrawerProps) {
 
   // Store the trigger element on open & lock scroll
   useEffect(() => {
-    const html = document.documentElement;
-
     if (open) {
       triggerRef.current = document.activeElement;
-      const scrollY = window.scrollY;
-      // html에 position:fixed + width:100% 로 레이아웃 시프트 없이 스크롤 잠금
-      html.style.position = 'fixed';
-      html.style.top = `-${scrollY}px`;
-      html.style.width = '100%';
-      html.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
     } else {
-      const scrollY = html.style.top;
-      html.style.position = '';
-      html.style.top = '';
-      html.style.width = '';
-      html.style.overflow = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      document.body.style.overflow = '';
       if (triggerRef.current instanceof HTMLElement) {
         triggerRef.current.focus();
       }
     }
     return () => {
-      const scrollY = html.style.top;
-      html.style.position = '';
-      html.style.top = '';
-      html.style.width = '';
-      html.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY) * -1);
-      }
+      document.body.style.overflow = '';
     };
   }, [open]);
 

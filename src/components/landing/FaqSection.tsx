@@ -54,9 +54,9 @@ export function FaqSection() {
   };
 
   return (
-    <section className="px-4 py-12">
-      <h2 className="mb-6 text-xl font-bold text-gray-900">자주 묻는 질문</h2>
-      <div className="space-y-2">
+    <section className="mx-auto max-w-6xl px-4 py-12 lg:px-12 lg:py-20 xl:px-20">
+      <h2 className="mb-6 text-xl font-bold text-gray-900 lg:text-3xl">자주 묻는 질문</h2>
+      <div className="space-y-2 lg:max-w-3xl">
         {FAQ_ITEMS.map((item, i) => {
           const isOpen = openIndex === i;
 
