@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { Footer } from '@/components/layout';
 import { StatsSection } from '@/components/landing/StatsSection';
 import { FaqSection } from '@/components/landing/FaqSection';
 import { EstimateChart } from '@/components/landing/EstimateChart';
+import { ComingSoonCTA } from '@/components/landing/ComingSoonCTA';
 
 export default function Home() {
   return (
@@ -31,15 +31,7 @@ export default function Home() {
             <br />
             고민되셨나요?
           </h1>
-          <Link
-            href="/estimate"
-            className="mt-8 hidden lg:inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-base font-semibold text-gray-900 shadow-lg transition-colors hover:brightness-95"
-          >
-            견적 알아보기
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </Link>
+          <ComingSoonCTA variant="hero" />
         </div>
       </section>
 
@@ -152,17 +144,7 @@ export default function Home() {
       <div className="h-20 lg:hidden" />
 
       {/* Floating CTA - 모바일/태블릿만 */}
-      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-6 pt-3 bg-gradient-to-t from-white via-white/95 to-transparent lg:hidden">
-        <Link
-          href="/estimate"
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-gray-900 shadow-lg transition-colors hover:brightness-95"
-        >
-          견적 알아보기
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </Link>
-      </div>
+      <ComingSoonCTA variant="floating" />
     </>
   );
 }

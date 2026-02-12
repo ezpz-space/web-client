@@ -21,7 +21,7 @@ export function Header() {
           <img src="/images/logo-ezpz.svg" alt="ezpz" className="h-7" />
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav — temporarily hidden
         <nav className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
@@ -33,8 +33,9 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        */}
 
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger — temporarily hidden
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
@@ -45,9 +46,12 @@ export function Header() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
+        */}
       </header>
 
+      {/* Drawer — temporarily hidden
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      */}
     </>
   );
 }
