@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import { StepLayout } from '@/components/estimate';
 import { Input } from '@/components/ui';
 import { useEstimateStore } from '@/hooks/useEstimateStore';
-import { saveEstimateDraft } from '@/lib/storage';
 import { formatPhone, stripPhone } from '@/lib/utils';
 import { step1Schema } from '@/lib/validations';
 
 export default function Step1Page() {
   const router = useRouter();
-  const { name: savedName, phone: savedPhone, setStep1 } = useEstimateStore();
+  const { name: savedName, phone: savedPhone, setUserInfo } = useEstimateStore();
 
   const [name, setName] = useState(savedName);
   const [phone, setPhone] = useState(savedPhone ? formatPhone(savedPhone) : '');
@@ -41,24 +40,27 @@ export default function Step1Page() {
 
   const handleNext = () => {
     if (!validate()) return;
-    setStep1(name, rawPhone);
-    saveEstimateDraft({
-      lastStep: 1,
-      createdAt: new Date().toISOString(),
-      data: { name, phone: rawPhone },
-    });
+    setUserInfo(name, rawPhone);
     router.push('/estimate/step2');
   };
 
   return (
     <StepLayout
       step={1}
-      title="견적 정보 입력"
+      title="견적 알아보기"
       onNext={handleNext}
+      nextLabel="신규 견적 알아보기"
       nextDisabled={!isValid}
       backHref="/"
+      showSkip
+      onSkip={() => router.push('/estimate/step2')}
     >
       <div className="space-y-5">
+        <p className="text-base text-gray-500">
+          입력하신 정보는 견적 저장 및
+          <br />
+          재조회 용도로만 사용돼요.
+        </p>
         <Input
           label="이름"
           placeholder="이름을 입력해주세요"
@@ -68,7 +70,7 @@ export default function Step1Page() {
           autoComplete="name"
         />
         <Input
-          label="전화번호"
+          label="연락처"
           type="tel"
           placeholder="010-0000-0000"
           value={phone}

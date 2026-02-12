@@ -10,8 +10,9 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4">
-        <Link href="/" className="text-xl font-bold text-primary">
-          ezpz
+        <Link href="/" aria-label="ezpz 홈">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo-ezpz.svg" alt="ezpz" className="h-7" />
         </Link>
         <button
           type="button"

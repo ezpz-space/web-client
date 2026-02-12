@@ -2,34 +2,35 @@
 
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProgressIndicator } from './ProgressIndicator';
 import { Button } from '@/components/ui';
 
-interface StepLayoutProps {
-  step: number;
+interface WindowStepLayoutProps {
+  windowNumber: number;
+  step: string;       // "1/3", "2/3", "3/3"
   title: string;
+  subtitle?: string;
+  helpLink?: { label: string; onClick: () => void };
   children: ReactNode;
   onNext: () => void;
   nextLabel?: string;
   nextDisabled?: boolean;
   nextLoading?: boolean;
-  showSkip?: boolean;
-  onSkip?: () => void;
   backHref?: string;
 }
 
-export function StepLayout({
+export function WindowStepLayout({
+  windowNumber,
   step,
   title,
+  subtitle,
+  helpLink,
   children,
   onNext,
-  nextLabel = '다음',
+  nextLabel = '계속하기',
   nextDisabled = false,
   nextLoading = false,
-  showSkip = false,
-  onSkip,
   backHref,
-}: StepLayoutProps) {
+}: WindowStepLayoutProps) {
   const router = useRouter();
 
   const handleBack = () => {
@@ -42,7 +43,7 @@ export function StepLayout({
 
   return (
     <div className="flex min-h-[calc(100vh-56px)] flex-col">
-      {/* Step Header */}
+      {/* Nav header */}
       <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
         <button
           type="button"
@@ -54,19 +55,30 @@ export function StepLayout({
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-gray-900">{title}</h1>
-      </div>
-
-      {/* Progress */}
-      <div className="px-4">
-        <ProgressIndicator currentStep={step} />
+        <h1 className="text-lg font-bold text-gray-900">창 {windowNumber}</h1>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-6">{children}</div>
+      <div className="flex-1 px-4 py-6">
+        <p className="text-base text-gray-400 mb-2">{step}</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">{title}</h2>
+        {subtitle && (
+          <p className="text-base text-gray-400 mb-4">{subtitle}</p>
+        )}
+        {helpLink && (
+          <button
+            type="button"
+            onClick={helpLink.onClick}
+            className="text-base font-medium text-primary underline mb-6 cursor-pointer"
+          >
+            {helpLink.label}
+          </button>
+        )}
+        <div className="mt-6">{children}</div>
+      </div>
 
-      {/* Bottom buttons */}
-      <div className="sticky bottom-0 border-t border-gray-100 bg-white px-4 py-4 space-y-2">
+      {/* Bottom CTA */}
+      <div className="sticky bottom-0 border-t border-gray-100 bg-white px-4 py-4">
         <Button
           fullWidth
           size="lg"
@@ -76,15 +88,6 @@ export function StepLayout({
         >
           {nextLabel}
         </Button>
-        {showSkip && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="w-full py-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer"
-          >
-            건너뛰기
-          </button>
-        )}
       </div>
     </div>
   );

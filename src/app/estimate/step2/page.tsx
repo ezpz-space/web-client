@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { StepLayout } from '@/components/estimate';
 import { Input } from '@/components/ui';
 import { useEstimateStore } from '@/hooks/useEstimateStore';
-import { saveEstimateDraft, loadEstimateDraft } from '@/lib/storage';
 import type { Address } from '@/types';
 
 export default function Step2Page() {
@@ -13,14 +12,13 @@ export default function Step2Page() {
   const store = useEstimateStore();
 
   const [address, setAddress] = useState<Address>(
-    store.address || { zonecode: '', address: '', addressDetail: '', floor: undefined },
+    store.address || { zonecode: '', address: '', addressDetail: '' },
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isValid = address.zonecode.length > 0 && address.address.length > 0;
 
   const handleAddressSearch = () => {
-    // Daum/Kakao Postcode API
     if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).daum) {
       const daum = (window as unknown as { daum: { Postcode: new (opts: { oncomplete: (data: { zonecode: string; address: string }) => void }) => { open: () => void } } }).daum;
       new daum.Postcode({
@@ -34,7 +32,6 @@ export default function Step2Page() {
         },
       }).open();
     } else {
-      // Fallback: manual input for dev
       const addr = prompt('주소를 입력해주세요 (개발용)');
       if (addr) {
         setAddress((prev) => ({
@@ -52,25 +49,29 @@ export default function Step2Page() {
       setErrors({ address: '주소를 검색해주세요' });
       return;
     }
-    store.setStep2(address);
-    const draft = loadEstimateDraft();
-    saveEstimateDraft({
-      lastStep: 2,
-      createdAt: draft?.createdAt || new Date().toISOString(),
-      data: { ...draft?.data, address },
-    });
-    router.push('/estimate/step3');
+    store.setAddress(address);
+    // If no windows yet, start first window
+    if (store.windows.length === 0) {
+      store.startNewWindow();
+      router.push('/estimate/window/type');
+    } else {
+      router.push('/estimate/windows');
+    }
   };
 
   return (
     <StepLayout
       step={2}
-      title="주소 입력"
+      title="우리집 창견적, 알아볼까요?"
       onNext={handleNext}
+      nextLabel="계속하기"
       nextDisabled={!isValid}
       backHref="/estimate/step1"
     >
       <div className="space-y-5">
+        <p className="text-base text-gray-500">
+          주소를 참고해 가견적 범위를 안내드려요.
+        </p>
         {/* Address search */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700">주소</label>
@@ -99,23 +100,6 @@ export default function Step2Page() {
             setAddress((prev) => ({ ...prev, addressDetail: e.target.value }))
           }
           maxLength={100}
-        />
-
-        {/* Floor */}
-        <Input
-          label="층수 (선택)"
-          type="number"
-          placeholder="층수를 입력해주세요"
-          value={address.floor ?? ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            setAddress((prev) => ({
-              ...prev,
-              floor: val ? parseInt(val, 10) : undefined,
-            }));
-          }}
-          min={1}
-          max={99}
         />
       </div>
     </StepLayout>

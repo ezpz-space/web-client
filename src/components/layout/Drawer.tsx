@@ -10,8 +10,7 @@ interface DrawerProps {
 }
 
 const menuItems = [
-  { label: '홈', href: '/' },
-  { label: '견적 시작하기', href: '/estimate' },
+  { label: '내 견적 조회하기', href: '/estimate' },
   { label: '도움말', href: '/help' },
   { label: '고객센터', href: '/contact' },
 ];
@@ -20,20 +19,38 @@ export function Drawer({ open, onClose }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
 
-  // Store the trigger element on open
+  // Store the trigger element on open & lock scroll
   useEffect(() => {
+    const html = document.documentElement;
+
     if (open) {
       triggerRef.current = document.activeElement;
-      document.body.classList.add('overflow-hidden');
+      const scrollY = window.scrollY;
+      // html에 position:fixed + width:100% 로 레이아웃 시프트 없이 스크롤 잠금
+      html.style.position = 'fixed';
+      html.style.top = `-${scrollY}px`;
+      html.style.width = '100%';
+      html.style.overflow = 'hidden';
     } else {
-      document.body.classList.remove('overflow-hidden');
-      // Restore focus to trigger
+      const scrollY = html.style.top;
+      html.style.position = '';
+      html.style.top = '';
+      html.style.width = '';
+      html.style.overflow = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
       if (triggerRef.current instanceof HTMLElement) {
         triggerRef.current.focus();
       }
     }
     return () => {
-      document.body.classList.remove('overflow-hidden');
+      const scrollY = html.style.top;
+      html.style.position = '';
+      html.style.top = '';
+      html.style.width = '';
+      html.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY) * -1);
+      }
     };
   }, [open]);
 

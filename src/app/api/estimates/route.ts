@@ -1,22 +1,25 @@
 import { NextResponse } from 'next/server';
 import { estimateInputSchema } from '@/lib/validations';
-import type { BrandEstimate, BrandCode, EstimateResponse } from '@/types';
+import type { BrandEstimate, BrandCode, EstimateResponse, PriceRange, WindowSummary } from '@/types';
 
-function calculateEstimates(input: {
-  windowType: string | null;
-  dimensions: { width: number; height: number } | null;
-  quantity: number | null;
-}): BrandEstimate[] {
-  const qty = input.quantity ?? 4;
-  const baseMultiplier = input.windowType === 'expanded' ? 1.15 : 1.0;
+function calculateEstimates(windows: {
+  windowType: string;
+  width: number;
+  height: number;
+  quantity: number;
+}[]): { brands: BrandEstimate[]; totalPrice: PriceRange; windowSummary: WindowSummary[] } {
+  const totalQty = windows.reduce((sum, w) => sum + w.quantity, 0);
+  const hasExpanded = windows.some((w) => w.windowType === 'expanded');
+  const baseMultiplier = hasExpanded ? 1.1 : 1.0;
 
-  const brands: {
+  const brandData: {
     code: BrandCode;
     name: string;
     baseMin: number;
     baseMax: number;
-    installCount: number;
-    features: string[];
+    installCost: number;
+    description: string;
+    promotions?: string[];
     details: {
       glassType: string;
       frameMaterial: string;
@@ -27,11 +30,12 @@ function calculateEstimates(input: {
   }[] = [
     {
       code: 'LX',
-      name: 'LX 하우시스',
+      name: 'LX',
       baseMin: 350000,
       baseMax: 550000,
-      installCount: 2847,
-      features: ['국내 1위 브랜드', '최고급 단열 성능', 'AS 네트워크 최다'],
+      installCost: 300000,
+      description: 'LX 하우시스 브랜드 창호. 국내 1위 브랜드로 최고급 단열 성능을 자랑합니다.',
+      promotions: ['20% 할인'],
       details: {
         glassType: '로이 삼중유리 (24mm)',
         frameMaterial: 'PVC + 알루미늄 복합',
@@ -42,11 +46,12 @@ function calculateEstimates(input: {
     },
     {
       code: 'KCC',
-      name: 'KCC 창호',
+      name: 'KCC 글라스',
       baseMin: 300000,
       baseMax: 480000,
-      installCount: 2134,
-      features: ['가성비 우수', '다양한 디자인', '빠른 시공'],
+      installCost: 250000,
+      description: 'KCC 글라스 브랜드 창호. 가성비가 우수하고 다양한 디자인을 제공합니다.',
+      promotions: ['안전방충망 행사 중'],
       details: {
         glassType: '로이 이중유리 (22mm)',
         frameMaterial: 'PVC',
@@ -56,12 +61,12 @@ function calculateEstimates(input: {
       },
     },
     {
-      code: 'CHUNGAM',
-      name: '청암창호',
+      code: 'CHEONGAM',
+      name: '청암홈 윈도우',
       baseMin: 280000,
       baseMax: 420000,
-      installCount: 1562,
-      features: ['합리적 가격', '지역 밀착 시공', '맞춤 제작 가능'],
+      installCost: 200000,
+      description: '청암홈 윈도우 브랜드 창호. 합리적 가격과 맞춤 제작이 가능합니다.',
       details: {
         glassType: '로이 이중유리 (22mm)',
         frameMaterial: 'PVC',
@@ -72,27 +77,42 @@ function calculateEstimates(input: {
     },
   ];
 
-  return brands.map((brand) => {
+  const brands: BrandEstimate[] = brandData.map((brand) => {
     const unitMin = Math.round(brand.baseMin * baseMultiplier);
     const unitMax = Math.round(brand.baseMax * baseMultiplier);
-    const totalMin = unitMin * qty;
-    const totalMax = unitMax * qty;
-    const pyeongMin = Math.round(unitMin * 0.45);
-    const pyeongMax = Math.round(unitMax * 0.45);
 
     return {
       brand: brand.code,
       brandName: brand.name,
       logoUrl: `/images/brands/${brand.code.toLowerCase()}.png`,
-      minPrice: totalMin,
-      maxPrice: totalMax,
-      pricePerUnit: { min: unitMin, max: unitMax },
-      pricePerPyeong: { min: pyeongMin, max: pyeongMax },
-      installationCount: brand.installCount,
-      features: brand.features,
+      priceRange: { min: unitMin * totalQty, max: unitMax * totalQty },
+      installationCost: brand.installCost,
+      description: brand.description,
+      promotions: brand.promotions,
       details: brand.details,
     };
   });
+
+  const totalPrice: PriceRange = {
+    min: Math.min(...brands.map((b) => b.priceRange.min)),
+    max: Math.max(...brands.map((b) => b.priceRange.max)),
+  };
+
+  const typeLabels: Record<string, string> = {
+    standard: '일반 창',
+    expanded: '발코니 창 (확장)',
+    'non-expanded': '발코니 창 (비확장)',
+  };
+
+  const summaryMap = new Map<string, number>();
+  for (const w of windows) {
+    const label = typeLabels[w.windowType] || w.windowType;
+    summaryMap.set(label, (summaryMap.get(label) || 0) + w.quantity);
+  }
+
+  const windowSummary: WindowSummary[] = Array.from(summaryMap.entries()).map(([type, count]) => ({ type, count }));
+
+  return { brands, totalPrice, windowSummary };
 }
 
 export async function POST(request: Request) {
@@ -107,40 +127,32 @@ export async function POST(request: Request) {
       );
     }
 
-    const estimates = calculateEstimates({
-      windowType: result.data.windowType,
-      dimensions: result.data.dimensions,
-      quantity: result.data.quantity,
-    });
+    const { brands, totalPrice, windowSummary } = calculateEstimates(result.data.windows);
 
-    // DB 저장 시도 (DB 미연결 시 fallback)
     let estimateId: string;
     try {
       const { getPrisma } = await import('@/lib/prisma');
       const saved = await getPrisma().estimate.create({
         data: {
-          name: result.data.name,
-          phone: result.data.phone,
+          name: result.data.name || null,
+          phone: result.data.phone || null,
           zonecode: result.data.address.zonecode,
           address: result.data.address.address,
           addressDetail: result.data.address.addressDetail,
-          floor: result.data.address.floor,
-          windowType: result.data.windowType,
-          width: result.data.dimensions?.width,
-          height: result.data.dimensions?.height,
-          quantity: result.data.quantity,
-          results: JSON.parse(JSON.stringify(estimates)),
+          windows: JSON.parse(JSON.stringify(result.data.windows)),
+          results: JSON.parse(JSON.stringify(brands)),
         },
       });
       estimateId = saved.id;
     } catch {
-      // DB 미연결 시 임시 ID
       estimateId = `est_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
     const response: EstimateResponse = {
       estimateId,
-      results: estimates,
+      totalPrice,
+      windowSummary,
+      brands,
     };
 
     return NextResponse.json(response);

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// ── Step 1: 기본 정보 ──
+// ── Step 1: Sign-in (optional) ──
 
 export const nameSchema = z
   .string()
@@ -23,72 +23,37 @@ export const addressSchema = z.object({
   zonecode: z.string().min(1, '주소를 검색해주세요'),
   address: z.string().min(1, '주소를 검색해주세요'),
   addressDetail: z.string().max(100).optional(),
-  floor: z
-    .number()
-    .int()
-    .min(1, '1~99 사이의 숫자를 입력해주세요')
-    .max(99, '1~99 사이의 숫자를 입력해주세요')
-    .nullable()
-    .optional(),
 });
 
-export const step2Schema = z.object({
-  address: addressSchema,
+// ── Window info ──
+
+export const windowInfoSchema = z.object({
+  id: z.string().min(1),
+  windowType: z.enum(['standard', 'expanded', 'non-expanded']),
+  width: z.number().min(100, '100mm 이상').max(10000, '10000mm 이하'),
+  height: z.number().min(100, '100mm 이상').max(10000, '10000mm 이하'),
+  glassType: z.enum(['clear', 'lowe', 'super-double-lowe']).optional(),
+  windowConfig: z.enum(['fix', '2w', '3w']).optional(),
+  quantity: z.number().int().min(1).max(99).default(1),
 });
 
-// ── Step 3: 창 유형 ──
-
-export const windowTypeSchema = z.enum(['expanded', 'non-expanded']).nullable();
-
-// ── Step 4: 규격 ──
-
-export const dimensionsSchema = z
-  .object({
-    width: z
-      .number()
-      .min(100, '100mm 이상 입력해주세요')
-      .max(10000, '10000mm 이하로 입력해주세요'),
-    height: z
-      .number()
-      .min(100, '100mm 이상 입력해주세요')
-      .max(10000, '10000mm 이하로 입력해주세요'),
-  })
-  .nullable();
-
-// ── Step 5: 갯수 ──
-
-export const quantitySchema = z
-  .number()
-  .int()
-  .min(1, '1개 이상 입력해주세요')
-  .max(99, '99개 이하로 입력해주세요')
-  .nullable();
-
-// ── 견적 전체 ──
+// ── 견적 전체 (multi-window) ──
 
 export const estimateInputSchema = z.object({
-  name: nameSchema,
-  phone: phoneSchema,
+  name: nameSchema.optional(),
+  phone: phoneSchema.optional(),
   address: addressSchema,
-  windowType: windowTypeSchema,
-  dimensions: dimensionsSchema,
-  quantity: quantitySchema,
+  windows: z.array(windowInfoSchema).min(1, '창 정보를 1개 이상 입력해주세요'),
 });
 
 // ── 상담 신청 ──
 
 export const consultationSchema = z.object({
   estimateId: z.string().min(1),
-  name: z.string().min(1),
-  phone: z.string().min(1),
-  address: z.string().min(1),
-  availableDays: z
-    .array(z.enum(['MON', 'TUE', 'WED', 'THU', 'FRI']))
-    .min(1, '상담 가능한 요일을 선택해주세요'),
-  timeSlot: z.string().min(1, '상담 가능한 시간대를 선택해주세요'),
-  consultationType: z.enum(['PHONE', 'VISIT'], {
-    message: '상담 방식을 선택해주세요',
-  }),
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  preferredDays: z.array(z.enum(['MON', 'TUE', 'WED', 'THU', 'FRI'])).optional(),
+  preferredTime: z.string().optional(),
 });
 
 // ── 고객센터 문의 ──

@@ -5,9 +5,6 @@ import { cn } from '@/lib/utils';
 const STEPS = [
   { label: '기본 정보' },
   { label: '주소' },
-  { label: '창 유형' },
-  { label: '규격' },
-  { label: '갯수' },
 ];
 
 interface ProgressIndicatorProps {

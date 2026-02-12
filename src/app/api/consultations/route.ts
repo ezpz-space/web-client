@@ -14,19 +14,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // DB 저장 시도 (DB 미연결 시 fallback)
     let consultationId: string;
     try {
       const { getPrisma } = await import('@/lib/prisma');
       const saved = await getPrisma().consultation.create({
         data: {
           estimateId: result.data.estimateId,
-          name: result.data.name,
-          phone: result.data.phone,
-          address: result.data.address,
-          availableDays: result.data.availableDays,
-          timeSlot: result.data.timeSlot,
-          consultationType: result.data.consultationType,
+          name: result.data.name || null,
+          phone: result.data.phone || null,
+          preferredDays: result.data.preferredDays || [],
+          preferredTime: result.data.preferredTime || null,
         },
       });
       consultationId = saved.id;
@@ -36,7 +33,7 @@ export async function POST(request: Request) {
 
     const response: ConsultationResponse = {
       consultationId,
-      message: '상담 신청이 접수되었습니다. 영업일 기준 1~2일 이내에 연락드리겠습니다.',
+      success: true,
     };
 
     return NextResponse.json(response, { status: 201 });

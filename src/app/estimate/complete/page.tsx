@@ -30,9 +30,11 @@ export default function CompletePage() {
 
         {/* Message */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">상담 신청 완료</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            영업일 기준 1~2일 이내에 연락드리겠습니다.
+          <h1 className="text-2xl font-bold text-gray-900">상담 요청이 완료됐어요.</h1>
+          <p className="mt-3 text-base text-gray-500 leading-relaxed">
+            전문가가 내용을 확인한 뒤<br />
+            순차적으로 연락드릴 거에요.<br />
+            조금만 기다려주세요!
           </p>
         </div>
 
@@ -66,7 +68,7 @@ export default function CompletePage() {
             }}
             className="w-full py-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer"
           >
-            새 견적 시작하기
+            새로운 견적 알아보기
           </button>
         </div>
       </div>

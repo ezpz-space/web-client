@@ -1,31 +1,35 @@
-// ── Estimate Input (5-step form data) ──
+// ── Estimate Input (Multi-window flow) ──
 
 export interface Address {
   zonecode: string;
   address: string;
   addressDetail?: string;
-  floor?: number;
 }
 
-export type WindowType = 'expanded' | 'non-expanded';
+export type WindowType = 'standard' | 'expanded' | 'non-expanded';
+export type GlassType = 'clear' | 'lowe' | 'super-double-lowe';
+export type WindowConfig = 'fix' | '2w' | '3w';
 
-export interface Dimensions {
-  width: number;
-  height: number;
+export interface WindowInfo {
+  id: string;
+  windowType: WindowType;
+  width: number;   // mm
+  height: number;  // mm
+  glassType?: GlassType;
+  windowConfig?: WindowConfig;
+  quantity: number; // default 1
 }
 
 export interface EstimateInput {
-  name: string;
-  phone: string;
+  name?: string;
+  phone?: string;
   address: Address;
-  windowType: WindowType | null;
-  dimensions: Dimensions | null;
-  quantity: number | null;
+  windows: WindowInfo[];
 }
 
 // ── Estimate Result (API response) ──
 
-export type BrandCode = 'LX' | 'KCC' | 'CHUNGAM';
+export type BrandCode = 'LX' | 'KCC' | 'CHEONGAM';
 
 export interface PriceRange {
   min: number;
@@ -44,38 +48,40 @@ export interface BrandEstimate {
   brand: BrandCode;
   brandName: string;
   logoUrl: string;
-  minPrice: number;
-  maxPrice: number;
-  pricePerUnit: PriceRange;
-  pricePerPyeong: PriceRange;
-  installationCount: number;
-  features: string[];
+  priceRange: PriceRange;
+  installationCost: number;
+  description: string;
+  promotions?: string[];
   details: BrandDetail;
+}
+
+export interface WindowSummary {
+  type: string;
+  count: number;
 }
 
 export interface EstimateResponse {
   estimateId: string;
-  results: BrandEstimate[];
+  totalPrice: PriceRange;
+  windowSummary: WindowSummary[];
+  brands: BrandEstimate[];
 }
 
 // ── Consultation ──
 
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI';
-export type ConsultationType = 'PHONE' | 'VISIT';
 
 export interface ConsultationRequest {
   estimateId: string;
-  name: string;
-  phone: string;
-  address: string;
-  availableDays: DayOfWeek[];
-  timeSlot: string;
-  consultationType: ConsultationType;
+  name?: string;
+  phone?: string;
+  preferredDays?: DayOfWeek[];
+  preferredTime?: string;
 }
 
 export interface ConsultationResponse {
   consultationId: string;
-  message: string;
+  success: boolean;
 }
 
 // ── Contact ──
@@ -90,7 +96,10 @@ export interface ContactRequest {
 // ── localStorage draft ──
 
 export interface EstimateDraft {
-  lastStep: number;
   createdAt: string;
-  data: Partial<EstimateInput>;
+  userInfo?: { name: string; phone: string };
+  address?: Address;
+  windows: Partial<WindowInfo>[];
+  currentWindowIndex: number;
+  currentStep: string;
 }

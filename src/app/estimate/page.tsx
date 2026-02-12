@@ -27,10 +27,21 @@ export default function EstimatePage() {
   const handleLoadDraft = () => {
     const draft = loadEstimateDraft();
     if (draft) {
-      loadFromDraft(draft.data as Parameters<typeof loadFromDraft>[0]);
-      const nextStep = Math.min(draft.lastStep + 1, 5);
+      loadFromDraft({
+        name: draft.userInfo?.name || '',
+        phone: draft.userInfo?.phone || '',
+        address: draft.address || null,
+        windows: (draft.windows || []) as Parameters<typeof loadFromDraft>[0]['windows'],
+        currentWindowIndex: draft.currentWindowIndex || 0,
+      });
       setSheetOpen(false);
-      router.push(`/estimate/step${nextStep}`);
+      // Navigate to where user left off
+      const step = draft.currentStep || 'step1';
+      if (step.startsWith('window')) {
+        router.push(`/estimate/${step}`);
+      } else {
+        router.push(`/estimate/${step}`);
+      }
     }
   };
 
@@ -54,7 +65,7 @@ export default function EstimatePage() {
           </p>
           <div className="space-y-3 pt-2">
             <Button fullWidth size="lg" onClick={handleLoadDraft}>
-              이전 견적 불러오기
+              저장한 견적 불러오기
             </Button>
             <Button
               fullWidth
