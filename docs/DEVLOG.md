@@ -168,6 +168,8 @@ ezpz/
     └── images/
         ├── hero-building.jpg        # Hero 배경 이미지
         ├── landing-illustration.svg # Feature 3 일러스트
+        ├── landing-message.svg     # Feature 1 메시지 카드
+        ├── landing-bg.svg          # Stats 섹션 배경
         ├── logo-ezpz.svg           # 헤더 로고
         ├── logo-lx.png             # LX 하우시스 (Figma 추출)
         ├── logo-kcc.png            # KCC Homecc (Figma 추출)
@@ -950,9 +952,81 @@ afe994f chore: remove accidentally committed .next trace files
 
 ---
 
+### Session 6: 랜딩 디자인 피그마 싱크 + 커스텀 도메인 연결
+
+**Claude Session ID**: `c2058ba2-bf1d-4874-b68d-c8096d47ec5d`
+**범위**: 랜딩페이지 이미지/배경 교체, FAQ 초기 상태 변경, 커스텀 도메인(ezpzspace.com) DNS 설정 및 Vercel 연결
+
+#### 1. 랜딩페이지 디자인 피그마 동기화
+
+| 변경 | 이전 | 이후 |
+|------|------|------|
+| **Feature 1 (감잡기)** | 인라인 카드 UI (HTML/CSS 그래디언트 + 텍스트) | `landing-message.svg` 이미지로 교체 |
+| **Feature 3 (맡기기)** | `bg-accent-light` 배경 + `rounded-xl` + `aspect-[4/3]` | 배경색/라운드/비율 제거, 일러스트만 표시 |
+| **EstimateChart** | `bg-gray-50` 배경 | 배경색 제거 (투명) |
+| **Stats 섹션** | CSS 그래디언트 배경 (`bg-gradient-to-br`) | `landing-bg.svg` 이미지 배경, 원본 비율 유지 |
+| **Stats 텍스트** | 좌측 정렬 | 가운데 정렬 (`items-center`) |
+| **FAQ** | 첫 번째 항목 열린 상태 (`useState(0)`) | 전부 닫힌 상태 (`useState(-1)`) |
+
+**변경 파일**:
+- `src/app/page.tsx` — Feature 1, 3 이미지 교체
+- `src/components/landing/EstimateChart.tsx` — 배경색 제거
+- `src/components/landing/StatsSection.tsx` — SVG 배경 + 텍스트 중앙 정렬
+- `src/components/landing/FaqSection.tsx` — 초기 상태 변경
+
+**신규 에셋**:
+- `public/images/landing-message.svg` — Feature 1 메시지 카드 이미지
+- `public/images/landing-bg.svg` — Stats 섹션 배경 이미지
+
+#### 2. Stats 섹션 배경 이미지 적용 과정
+
+배경 이미지 적용에 여러 접근 시도:
+1. `background-image` + `bg-cover` → 위아래 잘림
+2. `bg-contain bg-no-repeat` → 가로가 안 참
+3. `bg-[length:100%_100%]` → 비율 깨짐 (데스크탑에서 어색)
+4. `<img>` absolute + `object-cover` → 역시 잘림
+5. **최종**: `<Image>` 태그를 섹션 크기 결정자로 사용 (원본 비율 유지, 가로 100%), 텍스트는 absolute overlay
+
+```tsx
+<section className="relative">
+  <Image src="/images/landing-bg.svg" width={821} height={1383} className="w-full h-auto" />
+  <div className="absolute inset-0 flex flex-col items-center justify-center">
+    {/* 텍스트 콘텐츠 */}
+  </div>
+</section>
+```
+
+#### 3. 커스텀 도메인 연결 (ezpzspace.com)
+
+**도메인 등록**: GoDaddy
+
+**DNS 설정**:
+- 기존 Squarespace 연결 해제 (A 레코드 4개 + CNAME + HTTPS 삭제)
+- Vercel용 A 레코드 추가: `@ → 76.76.21.21`
+- Vercel용 CNAME 추가: `www → cname.vercel-dns.com`
+- Google 레코드 (MX, TXT, CNAME) 유지 여부는 이메일 사용에 따라 결정
+
+**Vercel 설정**:
+- Settings → Domains → `ezpzspace.com` 추가
+- `www.ezpzspace.com` → `ezpzspace.com` 307 리다이렉트 자동 설정
+- SSL 인증서 자동 발급 완료
+
+#### 커밋 이력
+
+```
+e9ddbbe feat: 랜딩페이지 디자인 피그마 동기화
+```
+
+---
+
 ### Git 커밋 이력 (전체)
 
 ```
+e9ddbbe feat: 랜딩페이지 디자인 피그마 동기화
+e799918 chore: Vercel 재빌드 트리거
+b79bd6a chore: trigger Vercel rebuild
+47258ca docs: README 소소한 보완 (postinstall 반영, ComingSoonCTA 추가)
+f019f7b docs: Session 5 작업 내역 문서화 (배포 준비, 반응형, Coming soon)
 47d7ecc feat: 메뉴 버튼 임시 숨김 + 견적 알아보기 Coming soon 모달 추가
 e6be9d0 feat: add responsive layout for tablet/PC + fix drawer scroll reset
 fb63b92 fix: add postinstall script for Prisma generate on Vercel
@@ -995,12 +1069,17 @@ c488f8b chore: initialize Next.js 14+ project with ezpz foundation
 - [x] GitHub 레포 생성 (`ezpz-space/web-client`, private)
 - [x] Vercel 배포 준비 (postinstall, README)
 - [x] Coming soon 모달 (견적 CTA 임시 처리)
+- [x] 랜딩 이미지 에셋 교체 (landing-message.svg, landing-bg.svg)
+- [x] Stats 섹션 SVG 배경 + 텍스트 중앙 정렬
+- [x] EstimateChart 배경색 제거
+- [x] FAQ 초기 상태 전부 닫힘
+- [x] 커스텀 도메인 연결 (ezpzspace.com, GoDaddy DNS → Vercel)
+- [x] Vercel 배포 완료 (GitHub 연결, SSL 인증서 발급)
 
 ### 남은 작업
 
 | 우선순위 | 작업 | 상세 |
 |----------|------|------|
-| P0 | Vercel 배포 완료 | GitHub 연결, 환경 변수, 도메인(ezpzspace.com) 설정 |
 | P0 | DB 연결 | PostgreSQL 인스턴스 생성 (Supabase/Neon), `DATABASE_URL` 설정, `prisma migrate dev` |
 | P1 | Coming soon 해제 | 견적 플로우 연결, 메뉴 버튼 복원 |
 | P1 | GA4 이벤트 트래킹 | CTA 클릭, 견적 완료, 상담 신청 이벤트 |
