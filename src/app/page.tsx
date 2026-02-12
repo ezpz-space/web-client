@@ -49,17 +49,14 @@ export default function Home() {
               가견적 범위를 알려드려요.
             </p>
           </div>
-          <div className="mt-6 flex items-center justify-center rounded-[28px] p-8 lg:mt-0 lg:w-1/2" style={{ background: 'linear-gradient(180deg, rgba(131,228,204,0.21) 0%, rgba(204,226,201,0.43) 67%), #fff' }}>
-            <div className="w-full max-w-[260px] rounded-2xl bg-white p-5 shadow-[0_5px_13px_rgba(0,0,0,0.12)]">
-              <p className="text-lg font-bold text-gray-900 leading-snug">
-                우리집 창견적,
-                <br />
-                알아볼까요?
-              </p>
-              <div className="mt-4 rounded-xl bg-white px-3 py-2.5 border border-gray-100">
-                <p className="text-sm text-gray-900">서울 강남구 이지피지로 123</p>
-              </div>
-            </div>
+          <div className="mt-6 lg:mt-0 lg:w-1/2">
+            <Image
+              src="/images/landing-message.svg"
+              alt="우리집 창견적, 알아볼까요?"
+              width={460}
+              height={340}
+              className="w-full"
+            />
           </div>
         </section>
 
@@ -94,13 +91,13 @@ export default function Home() {
               한 번에 끝낼 수 있어요.
             </p>
           </div>
-          <div className="mt-6 flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-accent-light lg:mt-0 lg:w-1/2 lg:aspect-auto lg:py-12">
+          <div className="mt-6 lg:mt-0 lg:w-1/2">
             <Image
               src="/images/landing-illustration.svg"
               alt="상담 요청 일러스트"
-              width={280}
-              height={230}
-              className="object-contain"
+              width={460}
+              height={340}
+              className="w-full"
             />
           </div>
         </section>

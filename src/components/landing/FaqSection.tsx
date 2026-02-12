@@ -47,7 +47,7 @@ const FAQ_ITEMS = [
 ];
 
 export function FaqSection() {
-  const [openIndex, setOpenIndex] = useState<number>(0);
+  const [openIndex, setOpenIndex] = useState<number>(-1);
 
   const handleToggle = (index: number) => {
     setOpenIndex(openIndex === index ? -1 : index);

@@ -58,7 +58,7 @@ export function EstimateChart() {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-gray-50 px-5 pb-6 pt-14">
+    <div className="overflow-hidden rounded-2xl px-5 pb-6 pt-14">
       <div className="space-y-5">
         {BRANDS.map((brand, i) => (
           <div key={brand.name}>
