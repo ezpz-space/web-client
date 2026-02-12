@@ -890,13 +890,78 @@ html.style.width = '100%';
 
 ---
 
-### Git 커밋 이력
+### Session 5: 배포 준비 + 반응형 + Coming soon
+
+**범위**: GitHub 레포 생성/push, Vercel 배포 준비, 반응형 레이아웃, Drawer 버그 수정, 임시 Coming soon 처리
+
+#### 1. GitHub 레포 생성 및 push
+
+- `ezpz-space/web-client` private 레포 생성
+- `origin` remote 연결, `master` → `main` 브랜치 변경
+- 전체 커밋 이력 push 완료
+
+#### 2. Vercel 배포 준비
+
+- **Prisma generate 빌드 에러 해결**: `package.json`에 `"postinstall": "prisma generate"` 추가
+  - Vercel에서 `npm install` 후 자동으로 Prisma 클라이언트 생성
+- `README.md` 작성 (프로젝트 개요, 기술 스택, 시작 가이드, 구조, 문서 링크)
+
+#### 3. 반응형 레이아웃 (모바일 → 태블릿 → PC)
+
+Figma 3개 프레임(모바일 `123:5260`, 태블릿 `359:19519`, PC `354:102363`) 기반으로 Tailwind 반응형 클래스 적용.
+
+| 컴포넌트 | 모바일/태블릿 | PC (`lg:` 1024px+) |
+|----------|-------------|---------------------|
+| **Header** | 로고만 (메뉴 숨김 상태) | 로고 + 텍스트 네비게이션 (주석 처리 상태) |
+| **Hero** | 이미지 위 + 텍스트 아래 | 텍스트 좌 + 이미지 우 2col + 인라인 CTA |
+| **Feature 1~3** | 세로 1col | 텍스트 + 이미지 가로 2col (Feature 2는 reverse) |
+| **Stats** | 세로 배치 | 가로 나란히 (`lg:flex-row`) |
+| **Brands** | 세로 정렬 | 가로 나란히 (`md:flex-row`) |
+| **FAQ** | 전체 폭 | `max-w-3xl` 제한 |
+| **Floating CTA** | 하단 고정 | 숨김 → Hero에 인라인 CTA |
+
+**변경 파일**: `page.tsx`, `Header.tsx`, `StatsSection.tsx`, `FaqSection.tsx`
+
+#### 4. Drawer 스크롤 복귀 버그 수정
+
+- **문제**: Drawer 닫을 때 메인페이지 스크롤이 최상단으로 이동
+- **원인**: `html` element에 `position: fixed` + `top: -scrollY` 방식의 스크롤 잠금이 복원 시 실패
+- **해결**: `position: fixed` 방식 제거 → 단순 `body.style.overflow = 'hidden'`으로 변경
+  - Drawer 자체가 `fixed` 오버레이이므로 body 위치 변경 불필요
+
+#### 5. Coming soon 임시 처리
+
+- **Header**: 햄버거 메뉴 버튼, 데스크탑 네비게이션, Drawer 모두 주석 처리
+- **CTA 버튼**: `Link`에서 `button`으로 변경, 클릭 시 "Coming soon" 모달 표시
+- `ComingSoonCTA` 클라이언트 컴포넌트 신규 생성
+  - `variant="hero"`: 데스크탑 Hero 영역 인라인 CTA
+  - `variant="floating"`: 모바일/태블릿 하단 고정 CTA
+  - `ComingSoonModal`: scrim + 중앙 카드 ("Coming soon / 서비스 준비 중입니다.")
+
+#### 커밋 이력
 
 ```
+47d7ecc feat: 메뉴 버튼 임시 숨김 + 견적 알아보기 Coming soon 모달 추가
+e6be9d0 feat: add responsive layout for tablet/PC + fix drawer scroll reset
+fb63b92 fix: add postinstall script for Prisma generate on Vercel
+6c75dfd docs: add README
+afe994f chore: remove accidentally committed .next trace files
+```
+
+---
+
+### Git 커밋 이력 (전체)
+
+```
+47d7ecc feat: 메뉴 버튼 임시 숨김 + 견적 알아보기 Coming soon 모달 추가
+e6be9d0 feat: add responsive layout for tablet/PC + fix drawer scroll reset
+fb63b92 fix: add postinstall script for Prisma generate on Vercel
+6c75dfd docs: add README
+afe994f chore: remove accidentally committed .next trace files
+902cca7 feat: multi-window estimate architecture + Figma design sync
 59f9c68 feat: add landing polish, Prisma DB, SEO, accessibility improvements
 f2a5b77 feat: implement complete estimate flow (Steps 1-5, result, consultation, complete)
 c488f8b chore: initialize Next.js 14+ project with ezpz foundation
-(WIP)   feat: multi-window architecture + Figma design sync
 ```
 
 ### 완료된 작업
@@ -909,6 +974,7 @@ c488f8b chore: initialize Next.js 14+ project with ezpz foundation
 - [x] Zod 검증 스키마 전체
 - [x] 타입 시스템 전체 (멀티 윈도우, WindowInfo, GlassType, WindowConfig)
 - [x] 랜딩페이지 Figma 디자인 싱크 (Hero, Features, EstimateChart, Stats, Brands, FAQ, CTA)
+- [x] 반응형 레이아웃 (모바일/태블릿/PC — Tailwind `md:`, `lg:`)
 - [x] EstimateChart 애니메이션 (rAF 기반 독립 사인파 바 + 가격 연동)
 - [x] FaqSection 컴포넌트 (10개 Q&A, 단일 오픈 아코디언)
 - [x] 견적 시작 (BottomSheet, draft 불러오기)
@@ -924,15 +990,19 @@ c488f8b chore: initialize Next.js 14+ project with ezpz foundation
 - [x] 카카오 주소 SDK 연동
 - [x] SEO (robots.txt, sitemap.xml, metadata)
 - [x] 접근성 (ARIA roles, radiogroup, pressed)
-- [x] Drawer 스크롤 잠금 (html position:fixed)
+- [x] Drawer 스크롤 버그 수정 (overflow hidden 방식)
 - [x] 브랜드 로고 Figma 재추출 (LX, KCC, Home WINDOW)
+- [x] GitHub 레포 생성 (`ezpz-space/web-client`, private)
+- [x] Vercel 배포 준비 (postinstall, README)
+- [x] Coming soon 모달 (견적 CTA 임시 처리)
 
 ### 남은 작업
 
 | 우선순위 | 작업 | 상세 |
 |----------|------|------|
+| P0 | Vercel 배포 완료 | GitHub 연결, 환경 변수, 도메인(ezpzspace.com) 설정 |
 | P0 | DB 연결 | PostgreSQL 인스턴스 생성 (Supabase/Neon), `DATABASE_URL` 설정, `prisma migrate dev` |
-| P0 | Vercel 배포 | 프로젝트 연결, 환경 변수, 도메인(ezpzspace.com) 설정 |
+| P1 | Coming soon 해제 | 견적 플로우 연결, 메뉴 버튼 복원 |
 | P1 | GA4 이벤트 트래킹 | CTA 클릭, 견적 완료, 상담 신청 이벤트 |
 | P1 | Sentry 에러 트래킹 | 프론트/백 에러 모니터링 |
 | P1 | Lighthouse 최적화 | LCP < 2.5s, CLS < 0.1, 이미지 최적화 |
