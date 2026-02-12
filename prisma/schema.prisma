@@ -7,6 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
+model Lead {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  name      String
+  email     String?
+  phone     String?
+
+  @@index([createdAt])
+}
+
 model Estimate {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())

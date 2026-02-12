@@ -1011,6 +1011,46 @@ afe994f chore: remove accidentally committed .next trace files
 - `www.ezpzspace.com` → `ezpzspace.com` 307 리다이렉트 자동 설정
 - SSL 인증서 자동 발급 완료
 
+#### 4. Coming Soon → 연락처 수집 모달 (Lead Capture)
+
+**목적**: "견적 알아보기" CTA 클릭 시 Coming soon 대신 연락처 수집 모달로 변경. 서비스 오픈 전 잠재 고객 확보.
+
+**Supabase 연결**:
+- PostgreSQL DB 연결 (Session Pooler, ap-northeast-2)
+- `prisma db push`로 스키마 동기화
+
+**DB 모델** (`Lead`):
+```prisma
+model Lead {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+  email     String?
+  phone     String?
+  @@index([createdAt])
+}
+```
+
+**검증 규칙** (`leadSchema`):
+- 이름: 필수 (2~20자, 한글/영문)
+- 이메일: 선택 (유효한 이메일 형식)
+- 전화번호: 선택 (010 형식)
+- 이메일 또는 전화번호 중 **하나 이상 필수** (`.refine()`)
+
+**API**: `POST /api/leads` — 기존 estimates/consultations와 동일 패턴 (Zod → Prisma → 응답)
+
+**모달 UI**:
+- 입력 폼: 이름, 이메일, 전화번호 (기존 `Input`, `Button` 컴포넌트 재사용)
+- 전화번호 자동 하이픈 포맷팅 (`formatPhone`)
+- 이름 + (이메일 or 전화) 입력 시 제출 버튼 활성화
+- 제출 → loading 스피너 → 성공 시 "감사합니다" 화면 (체크 아이콘 + 메시지)
+
+**변경 파일**:
+- `prisma/schema.prisma` — Lead 모델 추가
+- `src/lib/validations.ts` — leadSchema 추가
+- `src/app/api/leads/route.ts` — **신규** POST API
+- `src/components/landing/ComingSoonCTA.tsx` — ComingSoonModal → LeadCaptureModal 교체
+
 #### 커밋 이력
 
 ```
@@ -1075,6 +1115,8 @@ c488f8b chore: initialize Next.js 14+ project with ezpz foundation
 - [x] FAQ 초기 상태 전부 닫힘
 - [x] 커스텀 도메인 연결 (ezpzspace.com, GoDaddy DNS → Vercel)
 - [x] Vercel 배포 완료 (GitHub 연결, SSL 인증서 발급)
+- [x] Supabase PostgreSQL 연결 (Session Pooler)
+- [x] Lead 모델 + API + 연락처 수집 모달 (Coming soon 대체)
 
 ### 남은 작업
 
