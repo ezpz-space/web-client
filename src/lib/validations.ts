@@ -61,8 +61,8 @@ export const consultationSchema = z.object({
 export const leadSchema = z
   .object({
     name: nameSchema,
-    email: z.string().email('올바른 이메일 형식을 입력해주세요').optional().or(z.literal('')),
-    phone: phoneSchema.optional().or(z.literal('')),
+    email: z.union([z.string().email('올바른 이메일 형식을 입력해주세요'), z.literal('')]).optional(),
+    phone: z.union([phoneSchema, z.literal('')]).optional(),
   })
   .refine((data) => (data.email && data.email.length > 0) || (data.phone && data.phone.length > 0), {
     message: '이메일 또는 전화번호 중 하나를 입력해주세요',

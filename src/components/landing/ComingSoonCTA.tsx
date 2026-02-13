@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Input, Button } from '@/components/ui';
 import { formatPhone, stripPhone } from '@/lib/utils';
 import { leadSchema } from '@/lib/validations';
+import { trackCtaClick, trackLeadSubmission } from '@/lib/analytics';
 
 interface ComingSoonCTAProps {
   variant: 'hero' | 'floating';
@@ -12,12 +13,17 @@ interface ComingSoonCTAProps {
 export function ComingSoonCTA({ variant }: ComingSoonCTAProps) {
   const [open, setOpen] = useState(false);
 
+  const handleOpenModal = () => {
+    trackCtaClick(variant);
+    setOpen(true);
+  };
+
   if (variant === 'hero') {
     return (
       <>
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={handleOpenModal}
           className="mt-8 hidden lg:inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-base font-semibold text-gray-900 shadow-lg transition-colors hover:brightness-95 cursor-pointer"
         >
           견적 알아보기
@@ -35,7 +41,7 @@ export function ComingSoonCTA({ variant }: ComingSoonCTAProps) {
       <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-6 pt-3 bg-gradient-to-t from-white via-white/95 to-transparent lg:hidden">
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={handleOpenModal}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-gray-900 shadow-lg transition-colors hover:brightness-95 cursor-pointer"
         >
           견적 알아보기
@@ -93,6 +99,7 @@ function LeadCaptureModal({ onClose }: { onClose: () => void }) {
       });
 
       if (!res.ok) throw new Error();
+      trackLeadSubmission(!!email, !!rawPhone);
       setSubmitted(true);
     } catch {
       setErrors({ _root: '요청에 실패했습니다. 잠시 후 다시 시도해주세요.' });
